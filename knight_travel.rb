@@ -1,56 +1,67 @@
 require 'pry'
 
-# knight_moves([0,0],[1,2]) == [[0,0],[1,2]]
-# knight_moves([0,0],[3,3]) == [[0,0],[1,2],[3,3]]
-# knight_moves([3,3],[0,0]) == [[3,3],[1,2],[0,0]]
-
 class Gameboard
-  attr_reader :board
+  attr_accessor :board, :knight
 
-  def initialize
+  def initialize(knight)
     @board = create_board
+    @knight = knight
   end
 
   def create_board
-    board = []
+    board = Array.new(8, []) 
+    board.each { |row| row << [] }
+  end
 
-    7.downto(0) do |row|
-      0.upto(7) do |col|
-        board << [row, col]
+  def fill_board
+    board.each_with_index do |row, row_idx|
+      row.map!.with_index do |col, col_idx|
+        square = [row_idx + 1, col_idx + 1] 
+        col = knight.moves(square) 
+        p "#{square}: #{col}"
       end
     end
-
+    
     board
   end
 end
 
 class Knight
-  attr_reader :board
+  def initialize
 
-  def initialize(gameboard)
-    @board = gameboard.board
   end
 
-  def possible_moves(square, board = self.board)
-    moves = []
+ def add_move(square, moves)
+    row = square[0]
+    col = square[1]
 
-    (-2).upto(2) do |row|
-      (-2).upto(2) do |col|
-        next if row.abs == col.abs || row == 0 || col == 0
-
-        square = [row, col]
-        moves << square if board.include?(square)
-      end
+    if row >= 1 && row <= 8 && col >= 1 && col <= 8
+      moves << [(96 + col).chr, row]
     end
 
-    moves.sort
+    moves
+  end
+
+  def moves(square)
+    row = square[0] + 1
+    col = square[1] + 1
+    possible_moves = [] 
+
+    add_move([row + 1, col - 2], possible_moves)
+    add_move([row + 1, col + 2], possible_moves)
+    add_move([row - 1, col - 2], possible_moves)
+    add_move([row - 1, col + 2], possible_moves)
+    add_move([row + 2, col + 1], possible_moves)
+    add_move([row + 2, col - 1], possible_moves)
+    add_move([row - 2, col - 1], possible_moves)
+    add_move([row - 2, col + 1], possible_moves)
+
+    possible_moves
   end
 end
 
+knight = Knight.new
+gameboard = Gameboard.new(knight)
 
-gameboard = Gameboard.new
-knight = Knight.new(gameboard)
-
-p knight.possible_moves([0, 0])
-
+#gameboard.fill_board
 
