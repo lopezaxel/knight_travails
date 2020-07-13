@@ -3,22 +3,21 @@ require 'pry'
 class Gameboard
   attr_accessor :board, :knight
 
-  def initialize(knight)
+  def initialize
     @board = create_board
-    @knight = knight
   end
 
   def create_board
-    board = Array.new(8, []) 
-    board.each { |row| row << [] }
+    Array.new(8) { Array.new(8, []) }
+    # fill_board(board)
   end
 
-  def fill_board
-    board.each_with_index do |row, row_idx|
-      row.map!.with_index do |col, col_idx|
-        square = [row_idx + 1, col_idx + 1] 
-        col = knight.moves(square) 
-        p "#{square}: #{col}"
+  def fill_board(board)
+    8.times do |row|
+      8.times do |col|
+        square = [row, col]
+        moves = knight.moves(square)
+        board[row][col] = moves
       end
     end
     
@@ -27,24 +26,26 @@ class Gameboard
 end
 
 class Knight
-  def initialize
+  attr_reader :gameboard
 
+  def initialize(gameboard)
+    @gameboard = gameboard
   end
 
  def add_move(square, moves)
     row = square[0]
     col = square[1]
 
-    if row >= 1 && row <= 8 && col >= 1 && col <= 8
-      moves << [(96 + col).chr, row]
+    if row >= 0 && row <= 7 && col >= 0 && col <= 7
+      moves << square 
     end
 
     moves
   end
 
   def moves(square)
-    row = square[0] + 1
-    col = square[1] + 1
+    row = square[0]
+    col = square[1]
     possible_moves = [] 
 
     add_move([row + 1, col - 2], possible_moves)
@@ -58,10 +59,30 @@ class Knight
 
     possible_moves
   end
+
+  def knight_moves(start_sq, end_sq)
+    queue = []  
+    queue << start_sq
+
+    visited = gameboard.create_board
+    until queue.empty?
+      sq = queue.shift 
+
+      if visited[sq[0]][sq[1]] != true
+        moves(sq).each do |move|
+          if move == end_sq
+            return [sq, end_sq]
+          end
+          queue << move
+          visited[sq[0]][sq[1]] = true
+        end
+      end
+    end
+  end
 end
 
-knight = Knight.new
-gameboard = Gameboard.new(knight)
+gameboard = Gameboard.new
+knight = Knight.new(gameboard)
 
-#gameboard.fill_board
+p knight.knight_moves([0, 0], [7, 7])
 
