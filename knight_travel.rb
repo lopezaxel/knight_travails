@@ -11,18 +11,6 @@ class Gameboard
     Array.new(8) { Array.new(8, []) }
     # fill_board(board)
   end
-
-  def fill_board(board)
-    8.times do |row|
-      8.times do |col|
-        square = [row, col]
-        moves = knight.moves(square)
-        board[row][col] = moves
-      end
-    end
-    
-    board
-  end
 end
 
 class Knight
@@ -61,20 +49,37 @@ class Knight
   end
 
   def knight_moves(start_sq, end_sq)
+    path = []
+    path << end_sq
+    until path.first == start_sq
+      previous = bfs(start_sq, path.first)
+      path.unshift(previous)
+    end
+
+    path
+  end
+
+  def bfs(start_sq, end_sq)
     queue = []  
     queue << start_sq
 
-    visited = gameboard.create_board
+    visited = Array.new(8) {Array.new(8, false)}
+    path = gameboard.create_board
+
+    visited[start_sq[0]][start_sq[1]] = true
     until queue.empty?
       sq = queue.shift 
-
-      if visited[sq[0]][sq[1]] != true
-        moves(sq).each do |move|
+      possible_moves = moves(sq)
+     
+      possible_moves.each do |move|
+        if !visited[move[0]][move[1]]
           if move == end_sq
-            return [sq, end_sq]
+            path[move[0]][move[1]] = sq
+            return path[move[0]][move[1]]
           end
           queue << move
-          visited[sq[0]][sq[1]] = true
+          visited[move[0]][move[1]] = true
+          path[move[0]][move[1]] = sq
         end
       end
     end
@@ -84,5 +89,6 @@ end
 gameboard = Gameboard.new
 knight = Knight.new(gameboard)
 
+p knight.knight_moves([3, 3], [4, 3])
 p knight.knight_moves([0, 0], [7, 7])
 
