@@ -65,17 +65,14 @@ class Knight
     queue = []  
     queue << start_sq
 
-    path = gameboard.create_board
-
     until queue.empty?
       sq = queue.shift 
       possible_moves = moves(sq)
      
       possible_moves.each do |move|
         queue << move
-        path[move[0]][move[1]] = sq
 
-        return path[move[0]][move[1]] if move == end_sq
+        return sq if move == end_sq
       end
     end
   end
